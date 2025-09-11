@@ -1,11 +1,13 @@
 name: basic
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   greeter:
     runs-on: ubuntu-latest
     steps:
       - run: echo hello
-      - run: echo goodbye
+      - run: echo ci rocks
