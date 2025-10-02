@@ -6,7 +6,6 @@ import { User, Role } from "../src/service/pizzaService";
 test("homepage loads", async ({ page }) => {
   await page.goto("http://localhost:5173/");
 
-  // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle("JWT Pizza");
 });
 
