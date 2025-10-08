@@ -37,20 +37,39 @@ async function basicInit(page: Page) {
 
   // Authorize login for the given user
   await page.route("*/**/api/auth", async (route) => {
-    if (route.request().method() != "DELETE") {
-      const loginReq = route.request().postDataJSON();
-      const user = validUsers[loginReq.email];
-      if (!user || user.password !== loginReq.password) {
-        await route.fulfill({ status: 401, json: { error: "Unauthorized" } });
-        return;
+    const method = route.request().method();
+    if (method != "DELETE") {
+      if (method == "PUT") {
+        const loginReq = route.request().postDataJSON();
+        const user = validUsers[loginReq.email];
+        if (!user || user.password !== loginReq.password) {
+          await route.fulfill({ status: 401, json: { error: "Unauthorized" } });
+          return;
+        }
+        loggedInUser = validUsers[loginReq.email];
+        const loginRes = {
+          user: loggedInUser,
+          token: "abcdef",
+        };
+        expect(route.request().method()).toBe("PUT");
+        await route.fulfill({ json: loginRes });
+      } else if (method == "POST") {
+        const registerRes = {
+          user: {
+            name: "Pizza Diner 2",
+            email: "d2@jwt.com",
+            roles: [
+              {
+                role: "diner",
+              },
+            ],
+            id: 5,
+          },
+          token: "someToken",
+        };
+        expect(route.request().method()).toBe("POST");
+        await route.fulfill({ json: registerRes });
       }
-      loggedInUser = validUsers[loginReq.email];
-      const loginRes = {
-        user: loggedInUser,
-        token: "abcdef",
-      };
-      expect(route.request().method()).toBe("PUT");
-      await route.fulfill({ json: loginRes });
     }
   });
 
@@ -143,28 +162,30 @@ async function basicInit(page: Page) {
 
   // Get franchise
   await page.route(/\/api\/franchise\/\d+$/, async (route) => {
-    const franchiseRes = [
-      {
-        id: 1,
-        name: "pizzaPocket",
-        admins: [
-          {
-            id: 3,
-            name: "pizza franchisee",
-            email: "f@jwt.com",
-          },
-        ],
-        stores: [
-          {
-            id: 1,
-            name: "SLC",
-            totalRevenue: 0.0445,
-          },
-        ],
-      },
-    ];
-    expect(route.request().method()).toBe("GET");
-    await route.fulfill({ json: franchiseRes });
+    if (route.request().method() != "DELETE") {
+      const franchiseRes = [
+        {
+          id: 1,
+          name: "pizzaPocket",
+          admins: [
+            {
+              id: 3,
+              name: "pizza franchisee",
+              email: "f@jwt.com",
+            },
+          ],
+          stores: [
+            {
+              id: 1,
+              name: "SLC",
+              totalRevenue: 0.0445,
+            },
+          ],
+        },
+      ];
+      expect(route.request().method()).toBe("GET");
+      await route.fulfill({ json: franchiseRes });
+    }
   });
 
   // Get docs
@@ -278,6 +299,25 @@ test("admin login", async ({ page }) => {
   await page.waitForLoadState("networkidle");
 });
 
+test("admin close franchise", async ({ page }) => {
+  await basicInit(page);
+
+  await page.getByRole("link", { name: "Login" }).click();
+  await page.getByRole("textbox", { name: "Email address" }).fill("a@jwt.com");
+  await page.getByRole("textbox", { name: "Password" }).fill("admin");
+  await page.getByRole("button", { name: "Login" }).click();
+  await page.getByRole("link", { name: "Admin" }).click();
+  await expect(
+    page.getByRole("button", { name: "Add Franchise" })
+  ).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await page
+    .getByRole("row", { name: "PizzaCorp Close" })
+    .getByRole("button")
+    .click();
+  await page.getByRole("button", { name: "Close" }).click();
+});
+
 test("docs page", async ({ page }) => {
   await basicInit(page);
 
@@ -325,4 +365,17 @@ test("logout diner", async ({ page }) => {
   await page.getByRole("link", { name: "Logout" }).click();
   await page.waitForURL("/");
   await expect(page.getByRole("link", { name: "Login" })).toBeVisible();
+});
+
+test("register diner", async ({ page }) => {
+  await basicInit(page);
+
+  await page.getByRole("link", { name: "Register" }).click();
+  await page.getByRole("textbox", { name: "Full name" }).fill("Pizza Diner 2");
+  await page.getByRole("textbox", { name: "Email address" }).click();
+  await page.getByRole("textbox", { name: "Email address" }).fill("d2@jwt.com");
+  await page.getByRole("textbox", { name: "Password" }).click();
+  await page.getByRole("textbox", { name: "Password" }).fill("b");
+  await page.getByRole("button", { name: "Register" }).click();
+  await expect(page.getByRole("link", { name: "P2" })).toBeVisible();
 });
