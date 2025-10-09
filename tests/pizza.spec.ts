@@ -54,10 +54,11 @@ async function basicInit(page: Page) {
         expect(route.request().method()).toBe("PUT");
         await route.fulfill({ json: loginRes });
       } else if (method == "POST") {
+        const registerReq = route.request().postDataJSON();
         const registerRes = {
           user: {
-            name: "Pizza Diner 2",
-            email: "d2@jwt.com",
+            name: registerReq.name,
+            email: registerReq.email,
             roles: [
               {
                 role: "diner",
