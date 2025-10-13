@@ -13,14 +13,14 @@ async function basicInit(page: Page) {
   let loggedInUser: User | undefined;
   const validUsers: Record<string, User> = {
     "d@jwt.com": {
-      id: "3",
-      name: "Kai Chen",
+      id: "1",
+      name: "dinerUser",
       email: "d@jwt.com",
-      password: "a",
+      password: "diner",
       roles: [{ role: Role.Diner }],
     },
     "f@jwt.com": {
-      id: "3",
+      id: "2",
       name: "franchiseeUser",
       email: "f@jwt.com",
       password: "franchisee",
@@ -231,10 +231,10 @@ test("login", async ({ page }) => {
   await basicInit(page);
   await page.getByRole("link", { name: "Login" }).click();
   await page.getByRole("textbox", { name: "Email address" }).fill("d@jwt.com");
-  await page.getByRole("textbox", { name: "Password" }).fill("a");
+  await page.getByRole("textbox", { name: "Password" }).fill("diner");
   await page.getByRole("button", { name: "Login" }).click();
 
-  await expect(page.getByRole("link", { name: "KC" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "d" })).toBeVisible();
 });
 
 test("purchase with login", async ({ page }) => {
@@ -255,7 +255,7 @@ test("purchase with login", async ({ page }) => {
   await page.getByPlaceholder("Email address").click();
   await page.getByPlaceholder("Email address").fill("d@jwt.com");
   await page.getByPlaceholder("Email address").press("Tab");
-  await page.getByPlaceholder("Password").fill("a");
+  await page.getByPlaceholder("Password").fill("diner");
   await page.getByRole("button", { name: "Login" }).click();
 
   // Pay
@@ -348,11 +348,11 @@ test("visit diner dashboard", async ({ page }) => {
 
   await page.getByRole("link", { name: "Login" }).click();
   await page.getByRole("textbox", { name: "Email address" }).fill("d@jwt.com");
-  await page.getByRole("textbox", { name: "Password" }).fill("a");
+  await page.getByRole("textbox", { name: "Password" }).fill("diner");
   await page.getByRole("button", { name: "Login" }).click();
-  await page.getByRole("link", { name: "kc" }).click();
+  await expect(page.getByRole('link', { name: 'd', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'd', exact: true }).click();
   await expect(page.getByText("Your pizza kitchen")).toBeVisible();
-  await page.waitForLoadState("networkidle");
 });
 
 test("logout diner", async ({ page }) => {
@@ -360,7 +360,7 @@ test("logout diner", async ({ page }) => {
 
   await page.getByRole("link", { name: "Login" }).click();
   await page.getByRole("textbox", { name: "Email address" }).fill("d@jwt.com");
-  await page.getByRole("textbox", { name: "Password" }).fill("a");
+  await page.getByRole("textbox", { name: "Password" }).fill("diner");
   await page.getByRole("button", { name: "Login" }).click();
   await page.waitForURL("/");
   await page.getByRole("link", { name: "Logout" }).click();
