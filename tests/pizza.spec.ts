@@ -233,7 +233,6 @@ test("login", async ({ page }) => {
   await page.getByRole("textbox", { name: "Email address" }).fill("d@jwt.com");
   await page.getByRole("textbox", { name: "Password" }).fill("diner");
   await page.getByRole("button", { name: "Login" }).click();
-
   await expect(page.getByRole("link", { name: "d" })).toBeVisible();
 });
 
@@ -350,8 +349,10 @@ test("visit diner dashboard", async ({ page }) => {
   await page.getByRole("textbox", { name: "Email address" }).fill("d@jwt.com");
   await page.getByRole("textbox", { name: "Password" }).fill("diner");
   await page.getByRole("button", { name: "Login" }).click();
-  await expect(page.getByRole('link', { name: 'd', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'd', exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: "d", exact: true })
+  ).toBeVisible();
+  await page.getByRole("link", { name: "d", exact: true }).click();
   await expect(page.getByText("Your pizza kitchen")).toBeVisible();
 });
 
