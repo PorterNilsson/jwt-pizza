@@ -171,8 +171,21 @@ test("admin dashboard user table", async ({ page }) => {
   await page.getByRole("textbox", { name: "Email address" }).fill("a@jwt.com");
   await page.getByRole("textbox", { name: "Password" }).fill("admin");
   await page.getByRole("button", { name: "Login" }).click();
-  await page.getByRole("link", { name: "Admin" }).click();
-  
+  await page.getByRole("link", { name: "Admin" }).click();await expect(page.getByRole('cell', { name: 'dinerUser' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'franchiseeUser' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'adminUser' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'd@jwt.com' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'f@jwt.com' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'a@jwt.com' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'diner', exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'franchisee', exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'admin', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Name' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Email' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Roles' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Action' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Submit' }).first()).toBeVisible();  
 });
 
 async function updateUserTestFlow(

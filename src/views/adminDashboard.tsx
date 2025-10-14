@@ -42,7 +42,7 @@ export default function AdminDashboard(props: Props) {
 
   React.useEffect(() => {
     (async () => {
-      const users = await pizzaService.getUsers(userPage, 3, "*");
+      const users = await pizzaService.getUsers(userPage, 10, "*");
       setUserList(users);
     })();
   }, [props.user, userPage]);
