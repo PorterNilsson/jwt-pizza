@@ -1,7 +1,6 @@
 import { test, expect } from "playwright-test-coverage";
 import { Role, User } from "../src/service/pizzaService";
 import { Page } from "@playwright/test";
-import { log } from "console";
 
 async function basicInit(page: Page) {
   let loggedInUser: User | undefined;
@@ -84,6 +83,42 @@ async function basicInit(page: Page) {
     }
   });
 
+  await page.route(/\/api\/user\?.+$/, async (route) => {
+    const method = route.request().method();
+    if (method === "GET") {
+      const users = Object.values(validUsers).map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        roles: u.roles,
+      }));
+
+      await route.fulfill({
+        json: {
+          users,
+          more: false,
+        },
+      });
+    }
+  });
+
+  // Return the currently logged in user
+  await page.route("*/**/api/user/me", async (route) => {
+    expect(route.request().method()).toBe("GET");
+    await route.fulfill({ json: loggedInUser });
+  });
+
+  await page.route(/\/api\/franchise\?.+$/, async (route) => {
+    const method = route.request().method();
+    if (method == "GET") {
+      const franchises = {
+        franchises: [],
+        more: false,
+      };
+      await route.fulfill({ json: franchises });
+    }
+  });
+
   await page.goto("/");
 }
 
@@ -127,6 +162,17 @@ test("updateAdmin", async ({ page }) => {
     "a2@jwt.com",
     "admin2"
   );
+});
+
+test("admin dashboard user table", async ({ page }) => {
+  await basicInit(page);
+
+  await page.getByRole("link", { name: "Login" }).click();
+  await page.getByRole("textbox", { name: "Email address" }).fill("a@jwt.com");
+  await page.getByRole("textbox", { name: "Password" }).fill("admin");
+  await page.getByRole("button", { name: "Login" }).click();
+  await page.getByRole("link", { name: "Admin" }).click();
+  
 });
 
 async function updateUserTestFlow(
@@ -181,4 +227,3 @@ async function updateUserTestFlow(
   await page.getByRole("button", { name: "Login" }).click();
   await page.getByRole("link", { name: changedName[0], exact: true }).click();
 }
-

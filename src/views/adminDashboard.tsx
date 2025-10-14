@@ -43,7 +43,6 @@ export default function AdminDashboard(props: Props) {
   React.useEffect(() => {
     (async () => {
       const users = await pizzaService.getUsers(userPage, 3, "*");
-      console.log("Fetched users:", users);
       setUserList(users);
     })();
   }, [props.user, userPage]);
@@ -134,9 +133,7 @@ export default function AdminDashboard(props: Props) {
                               {user.email}
                             </td>
                             <td className="text-start px-6 whitespace-nowrap text-sm text-gray-800">
-                              {(user.roles || [])
-                                .map((r) => Role[r] || r)
-                                .join(", ")}
+                              {(user.roles || []).map((r) => r.role).join(", ")}
                             </td>
                             <td className="px-6 py-1 whitespace-nowrap text-center text-sm font-medium">
                               <button
