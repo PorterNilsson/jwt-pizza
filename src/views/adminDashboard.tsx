@@ -87,7 +87,7 @@ export default function AdminDashboard(props: Props) {
     await pizzaService.deleteUser(user.id!);
     const updatedUsers = await pizzaService.getUsers(
       userPage,
-      3,
+      10,
       `*${filterUserRef.current?.value || ""}*`
     );
     setUserList(updatedUsers);
