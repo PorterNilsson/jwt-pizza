@@ -119,6 +119,45 @@ async function basicInit(page: Page) {
     }
   });
 
+  // Franchises and stores
+  await page.route(/\/api\/franchise(\?.*)?$/, async (route) => {
+    const url = new URL(route.request().url());
+    const nameParam = url.searchParams.get("name") || "*";
+
+    const allFranchises = [
+      {
+        id: 2,
+        name: "LotaPizza",
+        stores: [
+          { id: 4, name: "Lehi" },
+          { id: 5, name: "Springville" },
+          { id: 6, name: "American Fork" },
+        ],
+      },
+      {
+        id: 3,
+        name: "PizzaCorp",
+        stores: [{ id: 7, name: "Spanish Fork" }],
+      },
+      {
+        id: 4,
+        name: "topSpot",
+        stores: [],
+      },
+    ];
+
+    const regex = new RegExp("^" + nameParam.replace(/\*/g, ".*") + "$");
+
+    const filteredFranchises = allFranchises.filter((f) =>
+      regex.test(f.name.toLowerCase())
+    );
+
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({ franchises: filteredFranchises }),
+    });
+  });
+
   await page.goto("/");
 }
 
@@ -171,21 +210,81 @@ test("admin dashboard user table", async ({ page }) => {
   await page.getByRole("textbox", { name: "Email address" }).fill("a@jwt.com");
   await page.getByRole("textbox", { name: "Password" }).fill("admin");
   await page.getByRole("button", { name: "Login" }).click();
-  await page.getByRole("link", { name: "Admin" }).click();await expect(page.getByRole('cell', { name: 'dinerUser' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'franchiseeUser' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'adminUser' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'd@jwt.com' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'f@jwt.com' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'a@jwt.com' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'diner', exact: true })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'franchisee', exact: true })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'admin', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Name' })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Email' })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Roles' })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Action' }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Submit' }).first()).toBeVisible();  
+  await page.getByRole("link", { name: "Admin" }).click();
+  await expect(page.getByRole("cell", { name: "dinerUser" })).toBeVisible();
+  await expect(
+    page.getByRole("cell", { name: "franchiseeUser" })
+  ).toBeVisible();
+  await expect(page.getByRole("cell", { name: "adminUser" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "d@jwt.com" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "f@jwt.com" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "a@jwt.com" })).toBeVisible();
+  await expect(
+    page.getByRole("cell", { name: "diner", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("cell", { name: "franchisee", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("cell", { name: "admin", exact: true })
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Users" })).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "Name" })).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "Email" })).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "Roles" })).toBeVisible();
+  await expect(
+    page.getByRole("columnheader", { name: "Action" }).first()
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Submit" }).first()
+  ).toBeVisible();
+});
+
+test("admin dashboard franchise table", async ({ page }) => {
+  await basicInit(page);
+
+  await page.getByRole("link", { name: "Login" }).click();
+  await page.getByRole("textbox", { name: "Email address" }).fill("a@jwt.com");
+  await page.getByRole("textbox", { name: "Password" }).fill("admin");
+  await page.getByRole("button", { name: "Login" }).click();
+
+  await page.getByRole("link", { name: "Admin" }).click();
+
+  await expect(page.getByRole("heading", { name: "Franchises" })).toBeVisible();
+  await expect(
+    page.getByRole("columnheader", { name: "Franchise", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("columnheader", { name: "Franchisee" })
+  ).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "Store" })).toBeVisible();
+  await expect(
+    page.getByRole("columnheader", { name: "Revenue" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("columnheader", { name: "Action" }).nth(1)
+  ).toBeVisible();
+  await expect(page.getByRole("cell", { name: "LotaPizza" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "PizzaCorp" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "topSpot" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Lehi" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Springville" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "American Fork" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Spanish Fork" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "₿" }).first()).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Add Franchise" })
+  ).toBeVisible();
+
+  await page.getByRole("textbox", { name: "Filter franchises" }).fill("l");
+  await page
+    .getByRole("cell", { name: "l Submit" })
+    .getByRole("button")
+    .click();
+
+  await expect(page.getByRole('cell', { name: 'LotaPizza' })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "PizzaCorp" })).not.toBeVisible();
+  await expect(page.getByRole("cell", { name: "topSpot" })).not.toBeVisible();
 });
 
 async function updateUserTestFlow(
