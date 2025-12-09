@@ -80,8 +80,6 @@ Attacks carried out by **Peer 1 on Peer 2**. (Samir Attacked Porter)
 | **Images** | <img src="./images/sam_1.png" alt="Screenshot 2025-12-09 at 12.07.37 PM.png" width="256" height="155" class="jop-noMdConv"> |
 | ****Corrections**** | Add input-size validation, request throttling, rate-limits, and schema validation; improve application-level defensive controls. |
 
-&nbsp;
-
 # Self Attack (Porter Nilsson)
 
 | Item | Result |
