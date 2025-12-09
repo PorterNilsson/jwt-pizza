@@ -82,7 +82,7 @@ Attacks carried out by **Peer 1 on Peer 2**. (Samir Attacked Porter)
 
 &nbsp;
 
-# Self Attack (Porter Nillson)
+# Self Attack (Porter Nilsson)
 
 | Item | Result |
 | --- | --- |
